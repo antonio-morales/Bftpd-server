@@ -6,7 +6,7 @@ global{
   #If set to yes, access is denied without giving a reason.
   #If set to anything else, access is denied giving the content of this
   #variable as a reason.
-  DENY_LOGIN="no" 
+  DENY_LOGIN="yes" 
 
   #The port number where the daemon should listen (only for daemon mode)
   PORT="21"
@@ -21,8 +21,8 @@ global{
   #If none of the given ports could be bound, the connection is
   #is refused. If you want to bind any free port in that case, add
   #"0" to the list.
-  #PASSIVE_PORTS="10000,12000-12100,13000"
-  PASSIVE_PORTS="0"
+  PASSIVE_PORTS="10000,12000-12100,13000"
+  #PASSIVE_PORTS="0"
 
   #If PORT data connections should be opened from port 20, say yes here. You
   #will probably need this if your server is behind a firewall that restricts
@@ -52,7 +52,7 @@ global{
   #Note that the directory in which the file resides must already exist.
   #Set the option to "" if you do not want that. This is discouraged for normal
   #use, but can be helpful if you want to create a boot floppy or something.
-  PATH_BFTPDUTMP="/var/run/bftpd/bftpdutmp"
+  PATH_BFTPDUTMP="/run/bftpd/bftpdutmp"
 
   #This option controls the buffer size while transferring files.
   #If you are on a very fast network (fast meaning 100 Mbit/s or more),
@@ -64,7 +64,7 @@ global{
   # This option can also be used to (crudely) throttle back
   # transfer speeds. Setting this to a very low value
   # can slow transfer speeds.
-  XFER_BUFSIZE="2048"
+  XFER_BUFSIZE="64000"
 
 
   # This variable controls whether the transfer buffer (see above option)
@@ -134,7 +134,8 @@ global{
 
   #ROOTDIR specifies the root directory of the client. It defaults to %h
   #(user's home directory). %u is replaced by the user name.
-  ROOTDIR="%h"
+  #ROOTDIR="%h"
+  ROOTDIR="/tmp"
 
   #Umask for the files or directories users create.
   UMASK="022"
@@ -153,7 +154,7 @@ global{
   AUTO_CHDIR="/"
 
   #Authentication type, values: PAM, PASSWD
-  AUTH="PASSWD"
+  AUTH="PAM"
 
   # The FILE_AUTH varible over-rides the AUTH value. If the FILE_AUTH
   # value is set to something other than an empty string ("")
@@ -169,12 +170,6 @@ global{
   # no password. Any password the users enters will be accepted.
   # The following example is for a user with no password.
   # anyone * users /home/ftp
-  #
-  # This option should almost never be used and is only for situations
-  # where one (or very few) users need to be granted access to a machine
-  # where normal user accounts cannot be created.
-  # Under no circumstances should anyone except root be
-  # able to read the FILE_AUTH password file.
   #FILE_AUTH="/etc/ftpdpassword"
 
 
@@ -233,11 +228,12 @@ global{
   #Of course, you can disable it for specific users by writing the appropiate
   #lines into the user structures.
   ALLOWCOMMAND_DELE="no"
-  ALLOWCOMMAND_STOR="yes"
+  ALLOWCOMMAND_STOR="no"
   ALLOWCOMMAND_SITE="no"
+  ALLOWCOMMAND_RETR="no"
 
   #Files that belong to these groups (comma-separated) are hidden in LIST/NLST.
-  HIDE_GROUP=""
+  HIDE_GROUP="ftp"
 
   #What message should be used as reply for the QUIT command?
   QUIT_MSG="See you later..."
@@ -309,7 +305,8 @@ user ftp {
   #Any password fits.
   ANONYMOUS_USER="yes"
   DENY_LOGIN="Anonymous login disabled."
-  #ROOTDIR="/path/for/anonymous/user"
+  # bftpd interprets ROOTDIR="%h" (the default), as ROOTDIR="/" for the anonymous user, override it
+  ROOTDIR="/srv/ftp"
 }
 
 user anonymous {
@@ -322,3 +319,21 @@ user root {
 }
 
 
+user jesse {
+  DENY_LOGIN="no"
+  ROOTDIR="/tmp"
+  ALLOWCOMMAND_DELE="no"
+  ALLOWCOMMAND_STOR="no"
+  ALLOWCOMMAND_SITE="yes"
+  ALLOWCOMMAND_RETR="yes"
+}
+
+#group @datausers {
+group @users {
+  DENY_LOGIN="no"
+  ROOTDIR="/tmp"
+  ALLOWCOMMAND_DELE="yes"
+  ALLOWCOMMAND_STOR="yes"
+  ALLOWCOMMAND_SITE="yes"
+  ALLOWCOMMAND_RETR="yes"
+}

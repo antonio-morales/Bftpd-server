@@ -1,6 +1,18 @@
 This file contains all major changes made during the development of bftpd.
 The uppermost change is the newest one.
 
+Jesse Smith <jessefrgsmith@yahoo.ca> -> 5.3
+	- Made the situation where FILE_AUTH more clear, advised
+          against it. Added warning about making sure password
+          file is not readable by another other than the admin.
+	- Updated Makefile.in to use more fine-grained dependency
+	  checks. Should speed up compiling when just one
+	  source file has been altered.
+	  New Makefile.in provided by Vemake.
+	- Fixed out of bounds memory read when fetching options.
+          Issue reported by and solution provided by Antonio Morales.
+
+
 Jesse Smith <jessefrgsmith@yahoo.ca> -> 5.2
 	- Make sure we do not send extra newline when DENY message
 	is sent to the client.

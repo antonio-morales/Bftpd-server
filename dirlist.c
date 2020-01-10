@@ -74,6 +74,7 @@ void hidegroups_init()
     char *bar;
     struct group *tmpgrp;
 
+    if (! foo) return;     /* avoid segfault */
     while ((bar = strtok(foo, ","))) {
         foo = NULL; /* strtok requirement */
         if ((strcmp(bar, "0")) && (!strtoul(bar, NULL, 10))) {
@@ -84,7 +85,7 @@ void hidegroups_init()
             if (strtoul(bar, NULL, 10))
                 add_to_hidegroups(strtoul(bar, NULL, 10));
     }
-	free(foo_save);
+    free(foo_save);
 }
 
 void hidegroups_end()

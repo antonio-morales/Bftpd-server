@@ -1,5 +1,5 @@
 # Generated automatically from Makefile.in by configure.
-VERSION=5.2
+VERSION=5.3
 CC?=gcc
 INSTALL=/usr/bin/install -c
 prefix=/usr
@@ -16,7 +16,7 @@ OBJS=bftpdutmp.o commands.o commands_admin.o cwd.o dirlist.o list.o login.o logg
 SRCS=bftpdutmp.c commands.c commands_admin.c cwd.c dirlist.c list.c login.c logging.c main.c mystring.c options.c md5.c
 
 OBJS2LINK=$(OBJS) $(PAX)
-LDFLAGS?=
+LDFLAGS=
 
 all: bftpd
 
@@ -24,7 +24,18 @@ bftpd: $(OBJS)
 	./mksources $(DIRPAX)
 	$(CC) $(OBJS2LINK) $(LDFLAGS) $(LIBS) -o bftpd
 
-$(OBJS): $(HEADERS) Makefile $(SRCS)
+$(OBJS): Makefile
+
+%.d: %.c Makefile
+	$(CC) -MM -MT"$@ $(@:.d=.o)" -MF$@ $(CFLAGS) $(INCLUDES) $<
+
+ifneq ($(MAKECMDGOALS),clean)
+ifneq ($(MAKECMDGOALS),distclean)
+-include $(OBJS:.o=.d)
+endif
+endif
+
+%.o: %.d
 
 install: all
 	mkdir -p $(DESTDIR)/$(prefix)/sbin
@@ -43,8 +54,9 @@ install: all
 clean distclean:
 	rm -f *~ $(OBJS) bftpd mksources.finished config.cache
 	[ "$(DIRPAX)" = "" ] || make -C $(DIRPAX) clean
+	rm -f *.d
 
-newversion: clean Makefile.in
+newversion: clean
 	cat Makefile.in | sed -e s/$(VERSION)/$(NEWVERSION)/g > Makefile.foo
 	mv Makefile.foo Makefile.in
 	./configure --enable-pax=pax --enable-libz --enable-pam
