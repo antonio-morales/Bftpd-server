@@ -1,6 +1,12 @@
 This file contains all major changes made during the development of bftpd.
 The uppermost change is the newest one.
 
+Jesse Smith <jessefrgsmith@yahoo.ca> -> 5.4
+	- Fixed potential one-by-one heap issue when
+          reading during transferring files. 
+	  Issue reported by Antonio Morales.
+
+
 Jesse Smith <jessefrgsmith@yahoo.ca> -> 5.3
 	- Made the situation where FILE_AUTH more clear, advised
           against it. Added warning about making sure password

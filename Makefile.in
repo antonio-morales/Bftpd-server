@@ -1,4 +1,4 @@
-VERSION=5.3
+VERSION=5.4
 CC?=@CC@
 INSTALL=@INSTALL@
 prefix=@prefix@

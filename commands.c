@@ -874,7 +874,7 @@ void command_mget(char *filenames)
 void command_retr(char *filename)
 {
         int num_clients = 1;
-        int new_num_clients = 1;  /* number of connectiosn to the server */
+        int new_num_clients;      /* number of connections to the server */
         int my_buffer_size;       /* size of the transfer buffer to use */
 	char *mapped = NULL;
 	char *buffer;
@@ -888,7 +888,8 @@ void command_retr(char *filename)
     gzFile gzfile;
 #endif
 	int phile;
-	int i, whattodo = DO_NORMAL;
+	ssize_t i;
+        int whattodo = DO_NORMAL;
 	struct stat statbuf;
 #if (defined(WANT_TAR) && defined(WANT_GZIP))
     int filedes[2];
@@ -1023,7 +1024,8 @@ void command_retr(char *filename)
                 
                 close(filedes[1]);
                 gzfile = gzdopen(sock, "wb");
-                while ((i = read(filedes[0], buffer, my_buffer_size))) {
+                i = read(filedes[0], buffer, my_buffer_size);
+                while (i > 0) {
                     gzwrite(gzfile, buffer, i);
                     test_abort(1, phile, sock);
 
@@ -1044,6 +1046,7 @@ void command_retr(char *filename)
                         wait_time.tv_usec = xfer_delay;
                         select( 0, NULL, NULL, NULL, &wait_time);
                     }
+                    i = read(filedes[0], buffer, my_buffer_size);
                 }     // end of while 
                 free(buffer);
                 gzclose(gzfile);
@@ -1121,7 +1124,8 @@ void command_retr(char *filename)
 
             /* Use "wb9" for maximum compression, uses more CPU time... */
             gzfile = gzdopen(sock, "wb");
-            while ((i = read(phile, buffer, my_buffer_size))) {
+            i = read(phile, buffer, my_buffer_size);
+            while (i > 0) {
                 gzwrite(gzfile, buffer, i);
                 test_abort(1, phile, sock);
                 if (change_buffer_size)
@@ -1140,6 +1144,7 @@ void command_retr(char *filename)
                     wait_time.tv_usec = xfer_delay;
                     select( 0, NULL, NULL, NULL, &wait_time);
                 }
+                i = read(phile, buffer, my_buffer_size)
             }
             free(buffer);
             close(phile);
@@ -1244,16 +1249,17 @@ void command_retr(char *filename)
                         else
                             my_buffer_size = xfer_bufsize;
 
-			while ((i = read(phile, buffer, my_buffer_size))) {
+                        i = read(phile, buffer, my_buffer_size);
+			while (i > 0) {
 				if (test_abort(1, phile, sock)) {
 					free(buffer);
 					return;
 				}
 
-                if (xfertype == TYPE_ASCII) {
-                    buffer[i] = '\0';
-                    i += replace(buffer, "\n", "\r\n", xfer_bufsize);
-                }
+                               if (xfertype == TYPE_ASCII) {
+                                   buffer[i] = '\0';
+                                   i += replace(buffer, "\n", "\r\n", xfer_bufsize);
+                               }
 				send_status = send(sock, buffer, i, 0);
                                 // check for dropped connection
                                 if (send_status < 0)
@@ -1283,7 +1289,7 @@ void command_retr(char *filename)
                                    wait_time.tv_usec = xfer_delay;
                                    select( 0, NULL, NULL, NULL, &wait_time);
                                 }
-
+                                i = read(phile, buffer, my_buffer_size);
 			}       // end of while
             free(buffer);
             }

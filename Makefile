@@ -1,5 +1,5 @@
 # Generated automatically from Makefile.in by configure.
-VERSION=5.3
+VERSION=5.4
 CC?=gcc
 INSTALL=/usr/bin/install -c
 prefix=/usr
